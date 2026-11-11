@@ -31,7 +31,8 @@ body {
 a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--dim); }
 a:hover { text-decoration-color: var(--paper); }
 a:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
-.wrap { max-width: 1040px; margin: 0 auto; }
+.wrap { max-width: clamp(1040px, 70vw, 1320px); margin: 0 auto; }
+.open { margin: 18px 0 0; max-width: 60ch; font-size: clamp(15px, 1.3vw, 19px); line-height: 1.45; color: var(--paper); }
 
 nav { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 11px; }
 nav .logo { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.04em; text-decoration: none; }
@@ -49,6 +50,7 @@ h1 { margin: 0; font-weight: 500; line-height: .92; letter-spacing: -.055em; fon
 section { display: grid; grid-template-columns: 1fr; gap: 14px; padding-block: 28px; border-top: 1px solid var(--line); }
 section > h2 { margin: 0; font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--dim); }
 .body { min-width: 0; max-width: 68ch; }
+.body p, li, dd { font-size: clamp(15px, 1.1vw, 18px); }
 .body p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--soft); }
 .item + .item { margin-top: 30px; }
 .item h3 { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -.025em; }
@@ -66,6 +68,11 @@ dd { margin: 3px 0 0; font-size: 15px; line-height: 1.5; color: var(--soft); }
 .proj a.repo { font-family: var(--mono); font-size: 12px; }
 footer { margin-top: 20px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: 12px; justify-content: space-between; }
 
+@media (max-height: 520px) and (orientation: landscape) {
+  header { padding-block: 5vh 4vh; }
+  h1 { font-size: clamp(44px, 14vh, 120px); }
+}
+@media (max-width: 359px) { nav .right { gap: 4vw; } h1 { font-size: 52px; } }
 @media (min-width: 820px) {
   section { grid-template-columns: 200px 1fr; gap: 40px; padding-block: 36px; }
   section > h2 { padding-top: 6px; }
@@ -88,13 +95,14 @@ footer { margin-top: 20px; padding-top: 28px; border-top: 1px solid var(--line);
       <a href="https://github.com/AustinEDi" target="_blank" rel="noopener">github.com/AustinEDi</a>
       <span>Midrand, Johannesburg</span>
     </p>
+    <p class="open">Open to employment, learnership, bursary and sponsorship opportunities.</p>
   </header>
 
   <main>
     <section>
       <h2>Profile</h2>
       <div class="body">
-        <p>Emerging technology professional completing a Systems Development learnership (NQF 4) while working as a Technology Intern at Governance Intelligence, a digital forensics and data analytics company. I work hands-on with forensic imaging and analysis tools, build practical projects around software, automation and AI-enabled workflows, and am working towards a long-term career in technology. A contract with Governance Intelligence is prospective from April 2027, and I remain open to sponsorship, bursary and employment opportunities.</p>
+        <p>Emerging technology professional completing a Systems Development learnership (NQF 4) while working as a Digital Forensics Intern at Governance Intelligence, a digital forensics and data analytics company. I work hands-on with forensic imaging and analysis tools and build practical projects around software, automation and AI-enabled workflows, with experience working with PostgreSQL. I am keen to join a team where I can keep learning and take on real responsibility, and I am open to any opportunity that fits.</p>
       </div>
     </section>
 
@@ -102,15 +110,14 @@ footer { margin-top: 20px; padding-top: 28px; border-top: 1px solid var(--line);
       <h2>Experience</h2>
       <div class="body">
         <div class="item">
-          <h3>Technology Intern</h3>
+          <h3>Digital Forensics Intern</h3>
           <p class="org">Governance Intelligence (GI), 2026 to present</p>
           <p style="margin-bottom:12px">Digital forensics, IT governance and data analytics organisation. The placement is the workplace component of my learnership.</p>
           <ul>
+            <li>Hands-on digital forensics work: evidence imaging and analysis with the tools listed below.</li>
             <li>Take part in ongoing data analytics tasks.</li>
             <li>Contribute to software development projects and technology solutions.</li>
             <li>Work with automation and gain hands-on exposure to AI, LLMs and agentic workflows.</li>
-            <li>Hands-on digital forensics work: evidence imaging and analysis with the tools listed below.</li>
-            <li>Looking ahead: prospective contract with Governance Intelligence from April 2027.</li>
           </ul>
         </div>
         <div class="item">
@@ -174,7 +181,7 @@ footer { margin-top: 20px; padding-top: 28px; border-top: 1px solid var(--line);
       <div class="body skills">
         <div><h3>Software and systems</h3><ul><li>Programming fundamentals</li><li>Systems development</li><li>Software development</li></ul></div>
         <div><h3>Digital forensics</h3><ul><li>Evidence imaging (FTK, Paladin, CAINE, Fiji)</li><li>Vound Intella</li><li>Forensic Explorer</li></ul></div>
-        <div><h3>Data</h3><ul><li>Data analytics tasks</li></ul></div>
+        <div><h3>Data</h3><ul><li>PostgreSQL</li><li>Data analytics tasks</li></ul></div>
         <div><h3>Automation and AI</h3><ul><li>Workflow automation</li><li>AI and LLM-enabled workflows</li><li>Agentic workflow exposure</li></ul></div>
         <div><h3>Professional</h3><ul><li>Research and problem-solving</li><li>Independent learning</li><li>Adaptability</li><li>Collaboration</li></ul></div>
       </div>

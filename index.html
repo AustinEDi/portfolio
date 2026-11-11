@@ -31,12 +31,13 @@ a { color: inherit; }
 a:focus-visible, button:focus-visible, .card:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
 
 /* scroll track: sets how far the camera travels */
-#track { height: 900vh; }
+#track { height: 900vh; height: 900dvh; }
 
 #stage {
   position: fixed; inset: 0; overflow: hidden; background: var(--ink);
   perspective: 1000px; perspective-origin: 50% 38%;
 }
+#grains { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 #world { position: absolute; left: 50%; top: 38%; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
 .card {
   position: absolute; border-radius: 10px; overflow: hidden; background: var(--card);
@@ -82,10 +83,19 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
 #cap .links a.copy { cursor: pointer; }
 @media (min-width: 860px) {
   #foot { grid-template-columns: auto 1fr; gap: 4vw; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
-  h1.title { font-size: clamp(90px, 13vw, 200px); }
+  h1.title { font-size: clamp(90px, 13vw, 260px); }
   #cap { justify-self: end; padding-bottom: 1.2vw; max-width: 42ch; }
 }
-@media (max-width: 859px) { #cap { min-height: 112px; } }
+/* phone held sideways, or any short window: title and caption sit side by side */
+@media (orientation: landscape) and (max-height: 560px) {
+  #foot { grid-template-columns: auto 1fr; gap: 4vw; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  h1.title { font-size: clamp(44px, 21vh, 150px); }
+  #cap { justify-self: end; max-width: 40ch; padding-bottom: 1vh; }
+  #cap h2 { font-size: 16px; }
+  #cap p.txt { font-size: 12.5px; line-height: 1.4; }
+  nav { padding-top: 10px; }
+}
+@media (max-width: 359px) { nav { gap: 3vw; font-size: 10px; } nav .logo { font-size: 19px; } }
 
 /* ---------- card interiors (all sized in px at scale 1) ---------- */
 .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -132,6 +142,7 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
 <main id="track" aria-label="Portfolio of Austin Makaota. Scroll to move through the projects."></main>
 
 <div id="stage" aria-hidden="false">
+  <canvas id="grains" aria-hidden="true"></canvas>
   <div id="world">
 
     <div class="card pic" id="c-fex" data-x="0" data-y="0" data-z="0" role="button" tabindex="0" aria-label="Go to FEX forensic agents">
@@ -182,6 +193,8 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
   var world = document.getElementById("world");
   var capEl = document.getElementById("cap");
   var countEl = document.getElementById("count");
+  var footEl = document.getElementById("foot");
+  var navEl = document.querySelector("nav");
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var GH = "https://github.com/AustinEDi";
@@ -193,7 +206,7 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
     { id: "c-itt", title: "ITT trading bot", meta: "Python, MetaApi, Oracle Cloud", text: "A US30 bot built on my own ITT model: liquidity sweep, change of character, fair value gap. Backtested and run live. Research in progress, not a track record.", links: [["GitHub", GH + "/itt_bot"]] },
     { id: "c-anv", title: "ANVENT Lite", meta: "Python, terminal app", text: "A terminal app that processes invoices, quotes and proofs of payment from PDF, Word and image files.", links: [["GitHub", GH + "/anvent"]] },
     { id: "c-tools", title: "Forensic tools", meta: "Hands-on experience", text: "Evidence analysis in Forensic Explorer and Vound Intella. Disk imaging with FTK Imager, Paladin and CAINE, and Fiji for Apple laptops.", links: [] },
-    { id: "c-hello", title: "Say hello", meta: "Intern at Governance Intelligence", text: "Finishing a systems development learnership. Happy to talk about projects and roles.", links: [["Email", "mailto:" + EMAIL], ["GitHub", GH], ["LinkedIn", "https://www.linkedin.com/in/austin-makaota-bb553140a"], ["CV", "cv.html"]], email: true }
+    { id: "c-hello", title: "Say hello", meta: "Digital Forensics Intern at Governance Intelligence", text: "Finishing a systems development learnership. Open to employment, learnership, bursary and sponsorship opportunities.", links: [["Email", "mailto:" + EMAIL], ["GitHub", GH], ["LinkedIn", "https://www.linkedin.com/in/austin-makaota-bb553140a"], ["CV", "cv.html"]], email: true }
   ];
   var N = stopsDef.length;
 
@@ -209,21 +222,50 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
   function byId(id) { return items.filter(function (i) { return i.id === id; })[0]; }
 
   var stops = [];
+  var usable = { top: 56, bottom: 600, cy: 300 };
+
+  function captionHTML(s) {
+    var links = s.links.map(function (l) {
+      var ext = /^https?:/.test(l[1]);
+      return '<a href="' + l[1] + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + l[0] + "</a>";
+    }).join("");
+    var emailLine = s.email ? '<p class="meta" style="margin:8px 0 0;user-select:all">' + EMAIL + "</p>" : "";
+    return "<h2>" + s.title + '</h2><p class="meta">' + s.meta + '</p><p class="txt">' + s.text + "</p>" + emailLine + (links ? '<div class="links">' + links + "</div>" : "");
+  }
+
+  // Find the free area between the nav and the title/caption, and aim the camera at its centre.
+  function measure() {
+    // size the caption box for the longest caption so the free area never changes between stops
+    var maxH = 0;
+    capEl.style.minHeight = "0px";
+    stopsDef.forEach(function (st) { capEl.innerHTML = captionHTML(st); maxH = Math.max(maxH, capEl.offsetHeight); });
+    capEl.style.minHeight = maxH + "px";
+    capEl.innerHTML = captionHTML(stopsDef[Math.max(shown, 0)]);
+    var top = navEl.getBoundingClientRect().bottom + 8;
+    var bottom = footEl.getBoundingClientRect().top - 10;
+    usable.top = top;
+    usable.bottom = Math.max(bottom, top + 120);
+    usable.cy = (usable.top + usable.bottom) / 2;
+    stage.style.perspectiveOrigin = "50% " + usable.cy + "px";
+    world.style.top = usable.cy + "px";
+  }
+
   function buildStops() {
-    var vw = window.innerWidth, vh = window.innerHeight;
+    measure();
+    var vw = window.innerWidth;
+    var availH = usable.bottom - usable.top;
     var narrow = vw < 860;
     stops = stopsDef.map(function (s) {
       if (!s.id) {
         var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
         items.forEach(function (i) { minX = Math.min(minX, i.x - i.w / 2); maxX = Math.max(maxX, i.x + i.w / 2); minY = Math.min(minY, i.y - i.h / 2); maxY = Math.max(maxY, i.y + i.h / 2); });
         var Wc = maxX - minX, Hc = maxY - minY;
-        var availH = narrow ? vh * 0.5 : vh * 0.72;
-        var scale = Math.min(vw * 0.9 / Wc, availH / Hc);
+        var scale = Math.min(vw * 0.9 / Wc, availH * 0.94 / Hc);
         return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, z: 0, d: P / scale, fz: 0 };
       }
       var it = byId(s.id);
-      var tw = Math.min(vw * (narrow ? 0.86 : 0.5), 760);
-      var th = vh * (narrow ? 0.4 : 0.55);
+      var tw = narrow ? vw * 0.86 : Math.min(vw * 0.5, 900);
+      var th = availH * 0.9;
       var sc = Math.min(tw / it.w, th / it.h);
       return { x: it.x, y: it.y, z: it.z, d: P / sc, fz: it.z };
     });
@@ -252,18 +294,69 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
     shown = i;
     var s = stopsDef[i];
     var render = function () {
-      var links = s.links.map(function (l) {
-        var ext = /^https?:/.test(l[1]);
-        return '<a href="' + l[1] + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + l[0] + "</a>";
-      }).join("");
-      var emailLine = s.email ? '<p class="meta" style="margin:8px 0 0;user-select:all">' + EMAIL + "</p>" : "";
-      capEl.innerHTML = "<h2>" + s.title + '</h2><p class="meta">' + s.meta + '</p><p class="txt">' + s.text + "</p>" + emailLine + (links ? '<div class="links">' + links + "</div>" : "");
+      capEl.innerHTML = captionHTML(s);
       capEl.classList.remove("swap");
     };
     countEl.textContent = (i === 0 ? 0 : i <= 5 ? i : 5) + "/5";
     if (first || reduce) { render(); return; }
     capEl.classList.add("swap");
     setTimeout(render, 200);
+  }
+
+  // ---- dim rock grains behind the cards: drift slowly, vibrate while scrolling ----
+  var gc = document.getElementById("grains");
+  var gx = gc.getContext("2d");
+  var grains = [], gW = 0, gH = 0, DPR = 1, shake = 0, lastSY = window.scrollY, lastT = 0;
+
+  function seedGrains() {
+    DPR = Math.min(window.devicePixelRatio || 1, 1.75);
+    gW = window.innerWidth; gH = window.innerHeight;
+    gc.width = Math.round(gW * DPR); gc.height = Math.round(gH * DPR);
+    var n = clamp(Math.round(gW * gH / 3200), 150, 460);
+    grains = [];
+    for (var k = 0; k < n; k++) {
+      var d = Math.pow(Math.random(), 1.6);
+      var tone = 140 + Math.floor(Math.random() * 70);
+      grains.push({
+        x: Math.random() * gW, y: Math.random() * gH, d: 0.25 + 0.75 * d,
+        r: 0.5 + 1.9 * d * Math.random() + 0.3 * Math.random(),
+        a: 0.16 + 0.3 * Math.random(), ph: Math.random() * 6.28,
+        sq: Math.random() < 0.6, fill: "rgb(" + (tone - 12) + "," + tone + "," + (tone + 20) + ")",
+        pts: [0, 1, 2, 3].map(function (q) { var an = q * 1.5708 + Math.random() * 0.9 - 0.45; var rr = 0.55 + Math.random() * 0.6; return [Math.cos(an) * rr, Math.sin(an) * rr]; })
+      });
+    }
+  }
+
+  function drawGrains(now, ie) {
+    var dt = lastT ? Math.min((now - lastT) / 1000, 0.05) : 0.016;
+    lastT = now;
+    var sy = window.scrollY, dsy = sy - lastSY;
+    lastSY = sy;
+    shake = Math.max(shake * Math.exp(-dt * 4.5), clamp(Math.abs(dsy) / 28, 0, 1));
+    var t = now / 1000;
+    var jit = reduce ? 0 : 0.1 + 4.2 * shake;
+    gx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    gx.clearRect(0, 0, gW, gH);
+    for (var k = 0; k < grains.length; k++) {
+      var g = grains[k];
+      if (!reduce) {
+        g.x += (7 * g.d + Math.sin(t * 0.6 + g.ph) * 3) * dt;
+        g.y += (-3 * g.d + Math.cos(t * 0.5 + g.ph) * 2.5) * dt - dsy * 0.12 * g.d;
+        if (g.x > gW + 4) g.x = -4; else if (g.x < -4) g.x = gW + 4;
+        if (g.y > gH + 4) g.y = -4; else if (g.y < -4) g.y = gH + 4;
+      }
+      var x = g.x + (Math.random() - 0.5) * 2 * jit * g.d;
+      var y = g.y + (Math.random() - 0.5) * 2 * jit * g.d;
+      gx.globalAlpha = Math.min(0.55, g.a * (0.2 + 0.8 * ie) * (1 + 0.5 * shake));
+      gx.fillStyle = g.fill;
+      if (g.sq) {
+        gx.beginPath();
+        gx.moveTo(x + g.pts[0][0] * g.r * 1.5, y + g.pts[0][1] * g.r * 1.5);
+        for (var q = 1; q < 4; q++) gx.lineTo(x + g.pts[q][0] * g.r * 1.5, y + g.pts[q][1] * g.r * 1.5);
+        gx.closePath(); gx.fill();
+      } else { gx.beginPath(); gx.arc(x, y, g.r, 0, 6.2832); gx.fill(); }
+    }
+    gx.globalAlpha = 1;
   }
 
   function frame(now) {
@@ -290,6 +383,7 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
     var cz = cz0 + (1 - ie) * 2600;
     var introBlur = (1 - ie) * 16;
 
+    drawGrains(now, ie);
     var px = reduce ? 0 : smx * 24, py = reduce ? 0 : smy * 16;
     world.style.transform = "translate3d(" + (-cx - px) + "px," + (-cy - py) + "px," + (P - cz) + "px)";
 
@@ -315,9 +409,12 @@ h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; pos
 
   var lastW = 0, lastH = 0;
   function buildIfNeeded() {
-    if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
-      lastW = window.innerWidth; lastH = window.innerHeight;
+    var w = window.innerWidth, h = window.innerHeight;
+    // ignore small height changes (phone address bar sliding in and out while scrolling)
+    if (w !== lastW || Math.abs(h - lastH) > 150) {
+      lastW = w; lastH = h;
       buildStops();
+      seedGrains();
     }
   }
 
