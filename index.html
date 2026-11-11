@@ -1,0 +1,355 @@
+<title>Austin Makaota</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: a fixed black stage. Project cards float in 3D space and the camera flies between them as you scroll.
+   Giant title bottom-left, tiny mono nav on top, caption beside or above the title. */
+:root {
+  --ink: #000000;
+  --paper: #f4f4f2;
+  --dim: #8d8d8a;
+  --card: #1b1b1c;
+  --line: rgba(255,255,255,.09);
+  --sand: #c9a98a;
+  --steel: #8ba3bd;
+  --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Space Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); }
+body {
+  margin: 0; background: var(--ink); color: var(--paper);
+  font-family: var(--display);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, .card:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
+
+/* scroll track: sets how far the camera travels */
+#track { height: 900vh; }
+
+#stage {
+  position: fixed; inset: 0; overflow: hidden; background: var(--ink);
+  perspective: 1000px; perspective-origin: 50% 38%;
+}
+#world { position: absolute; left: 50%; top: 38%; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+.card {
+  position: absolute; border-radius: 10px; overflow: hidden; background: var(--card);
+  border: 1px solid var(--line); cursor: pointer; will-change: transform, filter, opacity;
+  backface-visibility: hidden; color: var(--paper);
+}
+
+/* nav */
+nav {
+  position: fixed; z-index: 5; left: 0; right: 0;
+  top: env(safe-area-inset-top, 0px);
+  padding: 18px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 6vw; align-items: baseline;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+}
+nav .logo { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.04em; text-decoration: none; }
+nav .logo i { font-style: normal; color: var(--dim); }
+nav button { all: unset; cursor: pointer; }
+nav button:hover, nav a.link:hover { color: var(--dim); }
+nav .count { color: var(--dim); font-variant-numeric: tabular-nums; }
+nav a.link { text-decoration: none; }
+
+/* footer: title + caption */
+#foot {
+  position: fixed; z-index: 4; left: 0; right: 0; bottom: 0;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: grid; grid-template-columns: 1fr; gap: 14px; align-items: end; pointer-events: none;
+}
+#foot a, #foot button { pointer-events: auto; }
+h1.title {
+  margin: 0; font-weight: 500; line-height: .95; letter-spacing: -.055em;
+  font-size: clamp(56px, 17.5vw, 190px); white-space: nowrap;
+}
+h1.title sup { font-size: .3em; letter-spacing: -.02em; vertical-align: top; position: relative; top: .16em; margin-left: .06em; font-weight: 400; }
+#cap { max-width: 38ch; transition: opacity .22s ease, transform .22s ease; }
+#cap.swap { opacity: 0; transform: translateY(6px); }
+#cap h2 { margin: 0 0 4px; font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+#cap .meta { margin: 0 0 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+#cap p.txt { margin: 0; font-size: 14px; line-height: 1.45; color: #d6d6d3; }
+#cap .links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-family: var(--mono); font-size: 11px; }
+#cap .links a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--dim); }
+#cap .links a:hover { text-decoration-color: var(--paper); }
+#cap .links a.copy { cursor: pointer; }
+@media (min-width: 860px) {
+  #foot { grid-template-columns: auto 1fr; gap: 4vw; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+  h1.title { font-size: clamp(90px, 13vw, 200px); }
+  #cap { justify-self: end; padding-bottom: 1.2vw; max-width: 42ch; }
+}
+@media (max-width: 859px) { #cap { min-height: 112px; } }
+
+/* ---------- card interiors (all sized in px at scale 1) ---------- */
+.pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.lab { position: absolute; left: 10px; top: 10px; z-index: 2; font-family: var(--mono); font-size: 9px; padding: 4px 9px; border-radius: 99px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); color: #eee; }
+.pic.sm { background: #000; }
+
+#c-fex { width: 560px; height: 350px; border: 0; }
+#c-fex img { object-position: 50% 12%; }
+#c-fex .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.2) 55%, rgba(0,0,0,.3) 100%); }
+#c-fex .nav { position: absolute; top: 14px; right: 18px; display: flex; gap: 22px; font-family: var(--mono); font-size: 8px; color: rgba(255,255,255,.85); }
+#c-fex .lab { left: 18px; top: 12px; font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: -.03em; padding: 0; background: none; backdrop-filter: none; }
+#c-fex h3 { position: absolute; left: 22px; bottom: 34px; margin: 0; font-weight: 500; font-size: 30px; line-height: 1.05; letter-spacing: -.04em; color: #fff; }
+#c-fex h3 em { font-style: normal; color: rgba(255,255,255,.5); }
+#c-fex .foot { position: absolute; left: 22px; right: 22px; bottom: 12px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 7.5px; color: rgba(255,255,255,.65); }
+
+#c-scan { width: 300px; height: 215px; }
+#c-mkt { width: 300px; height: 205px; }
+#c-itt { width: 290px; height: 215px; }
+#c-anv { width: 300px; height: 205px; }
+#c-anv img { object-position: 50% 40%; }
+#c-tools { width: 250px; height: 300px; }
+#c-pill { width: 230px; height: 66px; border-radius: 99px; background: var(--steel); border: 0; display: grid; place-items: center; color: #16202b; font-weight: 700; font-size: 26px; letter-spacing: -.03em; }
+#c-clock { width: 130px; height: 74px; padding: 11px 13px; display: flex; flex-direction: column; justify-content: space-between; background: #111; }
+#c-clock .t { font-size: 24px; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+#c-clock .l { font-family: var(--mono); font-size: 8px; color: var(--dim); }
+#c-dots { width: 70px; height: 24px; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
+#c-dots i { width: 20px; height: 20px; border-radius: 50%; display: block; }
+#c-hello { width: 210px; height: 270px; border: 0; background: #111; }
+#c-hello img { object-position: 50% 30%; }
+#c-hello .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.8) 0%, rgba(0,0,0,0) 45%); }
+#c-hello b { position: absolute; left: 16px; bottom: 14px; font-size: 38px; font-weight: 500; letter-spacing: -.05em; line-height: .95; color: #fff; }
+
+@media (prefers-reduced-motion: reduce) { #cap { transition: none; } }
+</style>
+
+<nav aria-label="Primary">
+  <a class="logo" href="#" id="home">austin<i>.</i></a>
+  <button type="button" id="nav-projects">Projects</button>
+  <span class="count" id="count" aria-live="polite">0/5</span>
+  <a class="link" href="cv.html">CV</a>
+  <button type="button" id="nav-contact">Contact</button>
+</nav>
+
+<main id="track" aria-label="Portfolio of Austin Makaota. Scroll to move through the projects."></main>
+
+<div id="stage" aria-hidden="false">
+  <div id="world">
+
+    <div class="card pic" id="c-fex" data-x="0" data-y="0" data-z="0" role="button" tabindex="0" aria-label="Go to FEX forensic agents">
+      <img src="img/fex.jpg" alt="" draggable="false"><div class="shade"></div>
+      <span class="lab">fex.</span>
+      <div class="nav"><i>Case</i><i>Agents</i><i>Report</i></div>
+      <h3>Forensics run by agents<br><em>for faster casework</em></h3>
+      <div class="foot"><span>Python / LLM agents</span><span>Forensic Explorer CLI</span></div>
+    </div>
+
+    <div class="card pic sm" id="c-scan" data-x="-440" data-y="-180" data-z="140" role="button" tabindex="0" aria-label="Go to Network scanner">
+      <img src="img/scan.jpg" alt="" draggable="false"><span class="lab">Network scanner</span>
+    </div>
+
+    <div class="card pic sm" id="c-mkt" data-x="450" data-y="-200" data-z="-130" role="button" tabindex="0" aria-label="Go to Market intelligence">
+      <img src="img/market.jpg" alt="" draggable="false"><span class="lab">Market intelligence</span>
+    </div>
+
+    <div class="card pic sm" id="c-itt" data-x="-450" data-y="200" data-z="-70" role="button" tabindex="0" aria-label="Go to ITT trading bot">
+      <img src="img/itt.jpg" alt="" draggable="false"><span class="lab">ITT trading bot</span>
+    </div>
+
+    <div class="card pic sm" id="c-anv" data-x="410" data-y="205" data-z="110" role="button" tabindex="0" aria-label="Go to ANVENT Lite">
+      <img src="img/anvent.jpg" alt="" draggable="false"><span class="lab">ANVENT Lite</span>
+    </div>
+
+    <div class="card pic sm" id="c-tools" data-x="-140" data-y="330" data-z="210" role="button" tabindex="0" aria-label="Go to forensic tools">
+      <img src="img/tools.jpg" alt="" draggable="false"><span class="lab">Forensic tools</span>
+    </div>
+
+    <div class="card" id="c-pill" data-x="300" data-y="-10" data-z="230" aria-hidden="true">Vibe coder</div>
+    <div class="card" id="c-clock" data-x="-250" data-y="-330" data-z="190" aria-hidden="true"><span class="l">Midrand, ZA</span><span class="t" id="clock">--:--</span></div>
+    <div class="card" id="c-dots" data-x="330" data-y="-120" data-z="260" aria-hidden="true"><i style="background:#3a2a22"></i><i style="background:#c9a98a"></i><i style="background:#f4f4f2"></i></div>
+    <div class="card pic" id="c-hello" data-x="60" data-y="-300" data-z="300" role="button" tabindex="0" aria-label="Go to contact"><img src="img/austin.jpg" alt="Austin Makaota" draggable="false"><div class="shade"></div><span class="lab">Austin Makaota</span><b>Say<br>hello.</b></div>
+  </div>
+</div>
+
+<div id="foot">
+  <h1 class="title">Projects<sup>(05)</sup></h1>
+  <section id="cap" aria-live="polite"></section>
+</div>
+
+<script>
+(function () {
+  var P = 1000;
+  var EMAIL = "austin.makaota@outlook.com";
+  var stage = document.getElementById("stage");
+  var world = document.getElementById("world");
+  var capEl = document.getElementById("cap");
+  var countEl = document.getElementById("count");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var GH = "https://github.com/AustinEDi";
+  var stopsDef = [
+    { id: null, title: "Austin Makaota", meta: "Midrand, Johannesburg", text: "Systems developer. I build forensic automation, data pipelines and trading systems, and ship them with LLM-assisted coding.", links: [] },
+    { id: "c-fex", title: "FEX forensic agents", meta: "Python, LLM agents, Forensic Explorer CLI", text: "A command-line forensic explorer driven by agents. A context agent frames the case and evidence agents automate the repetitive forensic tasks.", links: [] },
+    { id: "c-scan", title: "Network scanner", meta: "Python, networking", text: "Maps hosts and open services across a network and reports what needs attention.", links: [["GitHub", GH + "/cyber_platform"]] },
+    { id: "c-mkt", title: "Market intelligence", meta: "Python, pandas, Yahoo Finance", text: "Scores news for trending and under-the-radar stories, then tracks market structure and SMA and ATR regimes for the S&P 500 and the Dow.", links: [] },
+    { id: "c-itt", title: "ITT trading bot", meta: "Python, MetaApi, Oracle Cloud", text: "A US30 bot built on my own ITT model: liquidity sweep, change of character, fair value gap. Backtested and run live. Research in progress, not a track record.", links: [["GitHub", GH + "/itt_bot"]] },
+    { id: "c-anv", title: "ANVENT Lite", meta: "Python, terminal app", text: "A terminal app that processes invoices, quotes and proofs of payment from PDF, Word and image files.", links: [["GitHub", GH + "/anvent"]] },
+    { id: "c-tools", title: "Forensic tools", meta: "Hands-on experience", text: "Evidence analysis in Forensic Explorer and Vound Intella. Disk imaging with FTK Imager, Paladin and CAINE, and Fiji for Apple laptops.", links: [] },
+    { id: "c-hello", title: "Say hello", meta: "Intern at Governance Intelligence", text: "Finishing a systems development learnership. Happy to talk about projects and roles.", links: [["Email", "mailto:" + EMAIL], ["GitHub", GH], ["LinkedIn", "https://www.linkedin.com/in/austin-makaota-bb553140a"], ["CV", "cv.html"]], email: true }
+  ];
+  var N = stopsDef.length;
+
+  // collect items
+  var items = Array.prototype.map.call(world.querySelectorAll(".card"), function (el) {
+    return { el: el, id: el.id, x: +el.dataset.x, y: +el.dataset.y, z: +el.dataset.z, w: el.offsetWidth, h: el.offsetHeight };
+  });
+  items.forEach(function (it) {
+    it.el.style.left = (-it.w / 2) + "px";
+    it.el.style.top = (-it.h / 2) + "px";
+    it.el.style.transform = "translate3d(" + it.x + "px," + it.y + "px," + it.z + "px)";
+  });
+  function byId(id) { return items.filter(function (i) { return i.id === id; })[0]; }
+
+  var stops = [];
+  function buildStops() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var narrow = vw < 860;
+    stops = stopsDef.map(function (s) {
+      if (!s.id) {
+        var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+        items.forEach(function (i) { minX = Math.min(minX, i.x - i.w / 2); maxX = Math.max(maxX, i.x + i.w / 2); minY = Math.min(minY, i.y - i.h / 2); maxY = Math.max(maxY, i.y + i.h / 2); });
+        var Wc = maxX - minX, Hc = maxY - minY;
+        var availH = narrow ? vh * 0.5 : vh * 0.72;
+        var scale = Math.min(vw * 0.9 / Wc, availH / Hc);
+        return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, z: 0, d: P / scale, fz: 0 };
+      }
+      var it = byId(s.id);
+      var tw = Math.min(vw * (narrow ? 0.86 : 0.5), 760);
+      var th = vh * (narrow ? 0.4 : 0.55);
+      var sc = Math.min(tw / it.w, th / it.h);
+      return { x: it.x, y: it.y, z: it.z, d: P / sc, fz: it.z };
+    });
+  }
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function smooth(t) { return t * t * (3 - 2 * t); }
+
+  var target = 0, cur = 0, mx = 0, my = 0, smx = 0, smy = 0;
+  var introStart = performance.now();
+  var shown = -1;
+
+  function scrollP() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? clamp(window.scrollY / max, 0, 1) * (N - 1) : 0;
+  }
+  function scrollToStop(i) {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: i / (N - 1) * max, behavior: reduce ? "auto" : "smooth" });
+  }
+
+  function setCaption(i) {
+    if (i === shown) return;
+    var first = shown === -1;
+    shown = i;
+    var s = stopsDef[i];
+    var render = function () {
+      var links = s.links.map(function (l) {
+        var ext = /^https?:/.test(l[1]);
+        return '<a href="' + l[1] + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + l[0] + "</a>";
+      }).join("");
+      var emailLine = s.email ? '<p class="meta" style="margin:8px 0 0;user-select:all">' + EMAIL + "</p>" : "";
+      capEl.innerHTML = "<h2>" + s.title + '</h2><p class="meta">' + s.meta + '</p><p class="txt">' + s.text + "</p>" + emailLine + (links ? '<div class="links">' + links + "</div>" : "");
+      capEl.classList.remove("swap");
+    };
+    countEl.textContent = (i === 0 ? 0 : i <= 5 ? i : 5) + "/5";
+    if (first || reduce) { render(); return; }
+    capEl.classList.add("swap");
+    setTimeout(render, 200);
+  }
+
+  function frame(now) {
+    buildIfNeeded();
+    var p = target;
+    cur = reduce ? p : cur + (p - cur) * 0.085;
+    smx += (mx - smx) * 0.05; smy += (my - smy) * 0.05;
+
+    var i = Math.min(Math.floor(cur), N - 2);
+    if (cur >= N - 1) i = N - 2;
+    var f = clamp(cur - i, 0, 1);
+    var e = smooth(clamp((f - 0.2) / 0.6, 0, 1));
+    if (cur >= N - 1) e = 1;
+    var a = stops[i], b = stops[i + 1];
+    var cx = lerp(a.x, b.x, e), cy = lerp(a.y, b.y, e), cz0 = lerp(a.z + a.d, b.z + b.d, e);
+    var fz = lerp(a.fz, b.fz, e);
+    var fx = lerp(a.x, b.x, e), fy = lerp(a.y, b.y, e);
+    var m = Math.sin(Math.PI * e);
+    var ov = lerp(i === 0 ? 1 : 0, 0, e);
+
+    // intro: pull in from far away and sharpen
+    var it = reduce ? 1 : clamp((now - introStart) / 1700, 0, 1);
+    var ie = 1 - Math.pow(1 - it, 3);
+    var cz = cz0 + (1 - ie) * 2600;
+    var introBlur = (1 - ie) * 16;
+
+    var px = reduce ? 0 : smx * 24, py = reduce ? 0 : smy * 16;
+    world.style.transform = "translate3d(" + (-cx - px) + "px," + (-cy - py) + "px," + (P - cz) + "px)";
+
+    items.forEach(function (o) {
+      var dz = cz - o.z;
+      var dist3 = Math.sqrt((o.x - fx) * (o.x - fx) + (o.y - fy) * (o.y - fy) + Math.pow((o.z - fz) * 1.6, 2));
+      var base = clamp((Math.abs(o.z - fz) - 230) / 110, 0, 5);
+      var fly = m * clamp((dist3 - 260) / 70, 0, 12);
+      var blur = Math.max(base, fly) + introBlur;
+      var dim = (1 - ov) * (1 - m) * clamp(dist3 / 160, 0, 1);
+      var op = clamp((dz - 60) / 110, 0, 1) * (0.2 + 0.8 * ie) * (1 - 0.95 * dim);
+      o.el.style.filter = blur > 0.25 ? "blur(" + blur.toFixed(1) + "px)" : "none";
+      o.el.style.opacity = op.toFixed(3);
+      o.el.style.visibility = op <= 0.01 ? "hidden" : "visible";
+    });
+
+    var nearest = Math.round(cur - 0.0001 + (e > 0.5 ? 0 : 0));
+    var idx = clamp(Math.round(i + (e > 0.5 ? 1 : 0)), 0, N - 1);
+    if (cur >= N - 1) idx = N - 1;
+    setCaption(idx);
+    requestAnimationFrame(frame);
+  }
+
+  var lastW = 0, lastH = 0;
+  function buildIfNeeded() {
+    if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
+      lastW = window.innerWidth; lastH = window.innerHeight;
+      buildStops();
+    }
+  }
+
+  window.addEventListener("scroll", function () { target = scrollP(); }, { passive: true });
+  window.addEventListener("pointermove", function (ev) {
+    mx = ev.clientX / window.innerWidth - 0.5; my = ev.clientY / window.innerHeight - 0.5;
+  }, { passive: true });
+
+  items.forEach(function (o) {
+    var go = function () {
+      var k = stopsDef.map(function (s) { return s.id; }).indexOf(o.id);
+      if (k > -1) scrollToStop(k);
+    };
+    o.el.addEventListener("click", go);
+    o.el.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
+  });
+  document.getElementById("home").addEventListener("click", function (ev) { ev.preventDefault(); scrollToStop(0); });
+  document.getElementById("nav-projects").addEventListener("click", function () { scrollToStop(1); });
+  document.getElementById("nav-contact").addEventListener("click", function () { scrollToStop(N - 1); });
+
+  // live local time (Johannesburg)
+  function tick() {
+    try {
+      document.getElementById("clock").textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg" });
+    } catch (e) {}
+  }
+  tick(); setInterval(tick, 20000);
+
+  var start = function () {
+    target = scrollP(); cur = target;
+    requestAnimationFrame(frame);
+  };
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(start); } else { start(); }
+})();
+</script>

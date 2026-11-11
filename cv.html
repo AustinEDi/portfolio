@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Austin Makaota CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root {
+  --ink: #000000;
+  --paper: #f4f4f2;
+  --soft: #d6d6d3;
+  --dim: #8d8d8a;
+  --line: rgba(255,255,255,.12);
+  --steel: #8ba3bd;
+  --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Space Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); }
+body {
+  margin: 0; background: var(--ink); color: var(--paper); font-family: var(--display);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(18px, env(safe-area-inset-top, 0px)) max(48px, env(safe-area-inset-bottom, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--dim); }
+a:hover { text-decoration-color: var(--paper); }
+a:focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+
+nav { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 11px; }
+nav .logo { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.04em; text-decoration: none; }
+nav .logo i { font-style: normal; color: var(--dim); }
+nav .right { display: flex; gap: 6vw; }
+nav .right a { text-decoration: none; }
+nav .right a:hover { color: var(--dim); }
+
+header { padding-block: 9vh 7vh; }
+h1 { margin: 0; font-weight: 500; line-height: .92; letter-spacing: -.055em; font-size: clamp(56px, 15vw, 170px); }
+.role { margin: 22px 0 0; font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.contact { margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; font-family: var(--mono); font-size: 12px; }
+.contact span { user-select: all; }
+
+section { display: grid; grid-template-columns: 1fr; gap: 14px; padding-block: 28px; border-top: 1px solid var(--line); }
+section > h2 { margin: 0; font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--dim); }
+.body { min-width: 0; max-width: 68ch; }
+.body p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--soft); }
+.item + .item { margin-top: 30px; }
+.item h3 { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -.025em; }
+.item .org { margin: 4px 0 12px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+ul { margin: 0; padding-left: 18px; }
+li { font-size: 15px; line-height: 1.55; color: var(--soft); padding-left: 2px; }
+li + li { margin-top: 5px; }
+li::marker { color: var(--dim); }
+dl { margin: 0; display: grid; gap: 16px; }
+dt { font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+dd { margin: 3px 0 0; font-size: 15px; line-height: 1.5; color: var(--soft); }
+.skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 26px 28px; max-width: none; }
+.skills h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+.edu .item p { font-size: 15px; }
+.proj a.repo { font-family: var(--mono); font-size: 12px; }
+footer { margin-top: 20px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: 12px; justify-content: space-between; }
+
+@media (min-width: 820px) {
+  section { grid-template-columns: 200px 1fr; gap: 40px; padding-block: 36px; }
+  section > h2 { padding-top: 6px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav aria-label="Primary">
+    <a class="logo" href="index.html">austin<i>.</i></a>
+    <span class="right"><a href="index.html">Projects</a><a href="#contact">Contact</a></span>
+  </nav>
+
+  <header>
+    <h1>Austin<br>Makaota</h1>
+    <p class="role">Systems development, software and data</p>
+    <p class="contact" id="contact">
+      <span>austin.makaota@outlook.com</span>
+      <a href="https://www.linkedin.com/in/austin-makaota-bb553140a" target="_blank" rel="noopener">linkedin.com/in/austin-makaota-bb553140a</a>
+      <a href="https://github.com/AustinEDi" target="_blank" rel="noopener">github.com/AustinEDi</a>
+      <span>Midrand, Johannesburg</span>
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Profile</h2>
+      <div class="body">
+        <p>Emerging technology professional completing a Systems Development learnership (NQF 4) while working as a Technology Intern at Governance Intelligence, a digital forensics and data analytics company. I work hands-on with forensic imaging and analysis tools, build practical projects around software, automation and AI-enabled workflows, and am working towards a long-term career in technology. A contract with Governance Intelligence is prospective from April 2027, and I remain open to sponsorship, bursary and employment opportunities.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Experience</h2>
+      <div class="body">
+        <div class="item">
+          <h3>Technology Intern</h3>
+          <p class="org">Governance Intelligence (GI), 2026 to present</p>
+          <p style="margin-bottom:12px">Digital forensics, IT governance and data analytics organisation. The placement is the workplace component of my learnership.</p>
+          <ul>
+            <li>Take part in ongoing data analytics tasks.</li>
+            <li>Contribute to software development projects and technology solutions.</li>
+            <li>Work with automation and gain hands-on exposure to AI, LLMs and agentic workflows.</li>
+            <li>Hands-on digital forensics work: evidence imaging and analysis with the tools listed below.</li>
+            <li>Looking ahead: prospective contract with Governance Intelligence from April 2027.</li>
+          </ul>
+        </div>
+        <div class="item">
+          <h3>Systems Development Learner</h3>
+          <p class="org">Mogapi Education Group, 2026 to present (in progress)</p>
+          <ul>
+            <li>Programming foundations, systems development and software development principles.</li>
+            <li>Apply theory through practical exercises and projects.</li>
+            <li>Independent research and problem-solving alongside formal study.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Forensic tools</h2>
+      <div class="body">
+        <dl>
+          <div><dt>Vound Intella</dt><dd>Investigation platform that indexes, searches and reviews large volumes of emails and documents.</dd></div>
+          <div><dt>Forensic Explorer</dt><dd>Digital forensics suite for examining and analysing acquired disk images.</dd></div>
+          <div><dt>FTK Imager, Paladin, CAINE, Fiji</dt><dd>Imaging tools for making forensic copies of drives. Fiji is used for imaging Apple laptops.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="proj">
+      <h2>Projects</h2>
+      <div class="body">
+        <div class="item">
+          <h3>ANVENT</h3>
+          <p class="org">Personal project in development</p>
+          <p style="margin-bottom:8px">A terminal application for processing invoices, quotes and proofs of payment from PDF, Word and image files.</p>
+          <a class="repo" href="https://github.com/AustinEDi/anvent" target="_blank" rel="noopener">github.com/AustinEDi/anvent</a>
+        </div>
+        <div class="item">
+          <h3>ITT Bot</h3>
+          <p class="org">Personal software project</p>
+          <p style="margin-bottom:8px">Explores structured logic, rules and automation.</p>
+          <a class="repo" href="https://github.com/AustinEDi/itt_bot" target="_blank" rel="noopener">github.com/AustinEDi/itt_bot</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="edu">
+      <h2>Education</h2>
+      <div class="body">
+        <div class="item">
+          <h3>Systems Development, NQF Level 4 Learnership</h3>
+          <p class="org">Mogapi Education Group, 2026 to present (in progress)</p>
+        </div>
+        <div class="item">
+          <h3>National Senior Certificate</h3>
+          <p class="org">Completed 2016</p>
+          <p>Mathematics 81%, Physical Sciences 78%, Life Sciences 76%, English FAL 73%, Geography 72%</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Skills</h2>
+      <div class="body skills">
+        <div><h3>Software and systems</h3><ul><li>Programming fundamentals</li><li>Systems development</li><li>Software development</li></ul></div>
+        <div><h3>Digital forensics</h3><ul><li>Evidence imaging (FTK, Paladin, CAINE, Fiji)</li><li>Vound Intella</li><li>Forensic Explorer</li></ul></div>
+        <div><h3>Data</h3><ul><li>Data analytics tasks</li></ul></div>
+        <div><h3>Automation and AI</h3><ul><li>Workflow automation</li><li>AI and LLM-enabled workflows</li><li>Agentic workflow exposure</li></ul></div>
+        <div><h3>Professional</h3><ul><li>Research and problem-solving</li><li>Independent learning</li><li>Adaptability</li><li>Collaboration</li></ul></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Interests</h2>
+      <div class="body"><p>Digital forensics, data analytics, software development, automation and AI-enabled workflows.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Austin Makaota</span>
+    <a href="index.html">Back to projects</a>
+  </footer>
+</div>
+</body>
+</html>
